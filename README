@@ -1,0 +1,33 @@
+eff.py models a sun-spinner, spinning around once a day
+It prints a table of half-angle versus %non-contamination over the course of a year.
+
+The algorithm works as follows.
+
+Given a half-angle tau, we loop through every day for a year (or some other timestep given by the variable stepsize), starting with midnight 1/1/1971.
+
+	- Every day, we use pyephem to calculate the position of the sun.  We 
+	  then loop through every angle theta in [0,2pi], using some small 
+	  increment (this is set by pv_res)
+		- For every angle theta, a unit-sphere point vector orthogonal 
+		  to the sun vector is obtained (this is pv_).  We then loop a 
+		  vector xv through a list of vectors representing the A4 
+		  catalogue + GRS1915
+			- If there is some source xv such that 
+			  xv.pv_ > cos(tau), then the scan 
+			  for that angle at that day was contaminated, 
+			  because a source was within a half-angle of 
+			  where we were looking.  If not then we increment 
+			  the variable "clear"
+
+	- After all that nested looping, we calculate
+ 
+				  clear
+		rho =   ------------------------------
+			pv_res*(365*24*60*60/stepsize)
+	  
+	  If this is 1, then we were never contaminated in the entire loop.  
+	  If it's 0 then there was always a source seen by our detector.
+
+	  The last step is to print tau and rho
+
+This is the routine used to generate the table in angles.dat
