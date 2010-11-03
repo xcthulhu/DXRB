@@ -1,8 +1,19 @@
+This is an efficiency calculation for a proposed mission to measure the Diffuse X-Ray Background.  Here are some previous papers regarding this measurement, and the A4 catalogue which introduces systematic error in our calculation:
+
+A4 DXRB
+http://adsabs.harvard.edu/abs/1999ApJ...520..124G
+
+A4 catalog
+http://adsabs.harvard.edu/cgi-bin/bib_query?1984ApJS...54..581L
+
+---------------------
+
 eff.py models a sun-spinner, spinning around once a day
-It prints a table of half-angle versus %non-contamination over the course of a year.
+It prints a tab seperated table of half-angle versus %non-contamination over the course of a year.
 
-The algorithm works as follows.
+The algorithm works as follows:
 
+<pseudocode>
 Given a half-angle tau, we loop through every day for a year (or some other timestep given by the variable stepsize), starting with midnight 1/1/1971.
 
 	- Every day, we use pyephem to calculate the position of the sun.  We 
@@ -29,5 +40,7 @@ Given a half-angle tau, we loop through every day for a year (or some other time
 	  If it's 0 then there was always a source seen by our detector.
 
 	  The last step is to print tau and rho
+
+</pseudocode>
 
 This is the routine used to generate the table in angles.dat
