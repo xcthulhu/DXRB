@@ -6,6 +6,11 @@ http://adsabs.harvard.edu/abs/1999ApJ...520..124G
 A4 catalog
 http://adsabs.harvard.edu/cgi-bin/bib_query?1984ApJS...54..581L
 
+You can get an electronic version of the A4 catalog by going to the following page:
+http://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dxray&Action=More+Options
+
+You will need to set "database_table" to "A4"
+
 ---------------------
 
 eff.py models a sun-spinner, spinning around once a day
@@ -16,13 +21,23 @@ The algorithm works as follows:
 <pseudocode>
 Given a half-angle tau, we loop through every day for a year (or some other timestep given by the variable stepsize), starting with midnight 1/1/1971.
 
-	- Every day, we use pyephem to calculate the position of the sun.  We 
-	  then loop through every angle theta in [0,2pi], using some small 
+	- Every day (denoted by the variable t), we use pyephem to 
+	  calculate the position of the sun as a vector on the unit sphere 
+	  around the earth (this is sv(t)).  
+
+	  We then loop through every angle theta in [0,2pi], using some small 
 	  increment (this is set by pv_res)
-		- For every angle theta, a unit-sphere point vector orthogonal 
-		  to the sun vector is obtained (this is pv_).  We then loop a 
-		  vector xv through a list of vectors representing the A4 
-		  catalogue + GRS1915
+
+		- For every angle theta, a unit-sphere pointing vector 
+		  orthogonal to the sun vector is obtained (this is pv_),
+		  using the following:
+
+		  b3 = sv(t) x [0,0,1]
+		  pv_ = sv(t) * cos(theta) + b3 * sin(theta)
+  
+		  We then loop a vector xv through a list of vectors 
+		  representing the A4 catalogue + GRS1915
+
 			- If there is some source xv such that 
 			  xv.pv_ > cos(tau), then the scan 
 			  for that angle at that day was contaminated, 

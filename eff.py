@@ -1,7 +1,7 @@
 import ephem
 from math import pi,sin,cos
 from time import gmtime,strftime
-from numpy import array,dot
+from numpy import array,dot,cross
 import sys
 
 # Shorthand for arrays
@@ -21,7 +21,7 @@ def vec(t,obj):
 sun = ephem.Sun()
 def pv(t,theta):
     sv = vec(t,sun)
-    b3 = dot(sv,ar([0,0,1]))
+    b3 = cross(sv,ar([0,0,1]))
     return sv * cos(theta) + b3 * sin(theta)
 
 # Checks if a condition holds for all elements in a list
