@@ -40,10 +40,10 @@ Given a half-angle tau, we loop through every day for a year (or some other time
 
 			- If there is some source xv such that 
 			  xv.pv_ > cos(tau), then the scan 
-			  for that angle at that day was contaminated, 
-			  because a source was within a half-angle of 
-			  where we were looking.  If not then we increment 
-			  the variable "clear"
+			  for that angle/timestep at that day 
+                          was contaminated, because a source was 
+                          within a half-angle of where we were looking.  
+                          If not then we increment the variable "clear"
 
 	- After all that nested looping, we calculate
  
