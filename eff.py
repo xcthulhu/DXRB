@@ -1,7 +1,7 @@
 import ephem
 from math import pi,sin,cos
 from time import gmtime,strftime
-from numpy import array,dot,cross
+from numpy import array,dot,cross,zeros
 import sys
 
 # Shorthand for arrays
@@ -13,9 +13,13 @@ def tm(t): return strftime("%Y/%m/%d %H:%M:%S", gmtime(t))
 # Calculate the vector on the unit sphere around the earth for an object
 def vec(t,obj):
     obj.compute(tm(t))
-    long = ephem.Ecliptic(obj).long
+    lon = ephem.Ecliptic(obj).lon
     lat = ephem.Ecliptic(obj).lat
-    return ar([sin(long), cos(long), sin(lat)])
+    return ar([sin(lon), cos(lon), sin(lat)])
+
+# Gather both the vector and the luminosity for an object
+def dat(t,obj):
+    return [vec(t,obj), obj.mag]
 
 # Define the pointing vector
 sun = ephem.Sun()
@@ -32,17 +36,20 @@ def all(ls,cond):
 
 # Get the A4 objects
 fp = open("./a4.edb", "r")
-# Get the vectors for the A4 objects
-a4 = [vec(0,ephem.readdb(s.rstrip())) for s in fp.readlines()]
+# Get the data for the A4 objects
+a4 = [dat(0,ephem.readdb(s.rstrip())) for s in fp.readlines()]
 fp.close()
 
-def eff(tau):
-    pv_res = 300
-    stepsize = 24*60*60
+def eff(tau, pv_res=300, stepsize=24*60*60, binsize=.005):
+    # seconds in a year
     yearsecs = 365*24*60*60
     cos_tau = cos(tau)
+
+    # total luminosity of the a4 catalog in terms of Crab Nebulae
+    crabs = sum([x[1] for x in a4])
+    # Make an empty histogram
+    hgram = zeros(crabs // binsize + 2, float)
     t = 0
-    clear = 0.0
 
     # check every day (or some other time increment specified)
     while ( t < yearsecs):
@@ -50,13 +57,20 @@ def eff(tau):
         for theta in [ i*2*pi/pv_res for i in range(pv_res) ]:
             # calculate the pointing vector
             pv_ = pv(t,theta)
-            # check if all of the a4 catalogue is out of range
-            if all(a4,(lambda xv: dot(xv,pv_) <= cos_tau)): clear += 1
+            # filter out the a4 catalogue entries that are out of range
+            hits = filter((lambda xv: dot(xv[0],pv_) >= cos_tau), a4)
+            if hits == []: hgram[0] += 1
+            else:
+                lum = sum([x[1] for x in hits])
+                hgram[(lum // binsize)+1] += 1
     
-    print tau,'\t',(clear / (pv_res*(yearsecs/stepsize)))
+    for bin_num in range(crabs // binsize + 2):
+        yield [tau, bin_num * binsize, hgram[bin_num] / (pv_res*(yearsecs/stepsize))]
 
 res = 300
 if __name__ == "__main__":
+    print "\t".join(["#half-angle","crabs","frequency"])
     for tau in [ i*pi/res for i in range(res) ]: 
-	eff(tau)
-	sys.stdout.flush()
+	for val in eff(tau):
+            print "\t".join(map(format,val))
+	
