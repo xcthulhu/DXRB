@@ -64,7 +64,7 @@ def eff(tau, pv_res=300, stepsize=24*60*60, binsize=.005):
                 lum = sum([x[1] for x in hits])
                 hgram[(lum // binsize)+1] += 1
     
-    for bin_num in range(crabs // binsize + 2):
+    for bin_num in range(int(crabs // binsize + 2)):
         yield [tau, bin_num * binsize, hgram[bin_num] / (pv_res*(yearsecs/stepsize))]
 
 res = 300

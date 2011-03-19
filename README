@@ -35,27 +35,46 @@ Given a half-angle tau, we loop through every day for a year (or some other time
 		  b3 = sv(t) x [0,0,1]
 		  pv_ = sv(t) * cos(theta) + b3 * sin(theta)
   
-		  We then loop a vector xv through a list of vectors 
-		  representing the A4 catalogue + GRS1915
+                - We then collect all of the sources xv from
+                  the A4 catalogue + GSR1915 where xv.pv_ >= cos(tau) 
 
-			- If there is some source xv such that 
-			  xv.pv_ > cos(tau), then the scan 
-			  for that angle/timestep at that day 
-                          was contaminated, because a source was 
-                          within a half-angle of where we were looking.  
-                          If not then we increment the variable "clear"
+			- if there are no sources, we increment hgram[0]
+                        - if there was a source, let lum = the combined
+                          luminosities of all of the sources, where the
+                          crab nebula is said to have luminosity = 1.
+                          In this case we increment hgram[(lum // binsize)+1]
 
 	- After all that nested looping, we calculate
  
-				  clear
-		rho =   ------------------------------
-			pv_res*(365*24*60*60/stepsize)
-	  
-	  If this is 1, then we were never contaminated in the entire loop.  
-	  If it's 0 then there was always a source seen by our detector.
+                                            hgram[bin_num]
+		rho[bin_num] =   ------------------------------
+                                  pv_res*(365*24*60*60/stepsize)
 
-	  The last step is to print tau and rho
+          For each bin in the histogram hgram, indexed by bin_num. 
+          This gives the frequency in which the sun-spinner was exposed to
+          luminosity falling in that bin.
 
+          Specifically, this data should be interpreted as follows:
+
+	  • If this rho[0] = 1, then the detector was never contaminated in the 
+            entire loop.  
+	    If rho[0]=0 then there was always at least one source seen by 
+            the detector.
+
+          • rho[1] represents the proportion of the time that the contamination 
+            was in the (0,binsize) interval, in terms of crab nebula 
+            luminosities (crabs). In turn, rho[2] represents the % of time 
+            where there the contamination was in the [binsize,2*binsize) crab 
+            range.  
+
+          • In general, rho[n] is the % of time where the contamination was in 
+            the [(n-1)*binsize, n*binsize) range.
+
+	  The final step is to print a line, for each bin_num, containing the 
+          list: 
+              [tau, bin_num*binsize, rho[bin_num]]
+
+          Seperated by tabs.  
 </pseudocode>
 
-This is the routine used to generate the table in angles.dat
+This is the routine used to generate the table in table.tsv
