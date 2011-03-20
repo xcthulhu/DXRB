@@ -28,12 +28,6 @@ def pv(t,theta):
     b3 = cross(sv,ar([0,0,1]))
     return sv * cos(theta) + b3 * sin(theta)
 
-# Checks if a condition holds for all elements in a list
-def all(ls,cond):
-    for x in ls:
-        if not(cond(x)): return False
-    return True
-
 # Get the A4 objects
 fp = open("./a4.edb", "r")
 # Get the data for the A4 objects
